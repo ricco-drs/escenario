@@ -1,0 +1,346 @@
+/* ==========================================================================
+   Estadio San Marcos — interfaz
+   Superpuesta al lienzo 3D: paneles translúcidos, tipografía compacta y
+   una sola familia de tokens para que todo el conjunto se lea igual.
+   ========================================================================== */
+
+:root {
+  --fondo:        #0b0f14;
+  --panel:        rgb(16 22 30 / .74);
+  --panel-solido: #131a23;
+  --borde:        rgb(255 255 255 / .10);
+  --borde-fuerte: rgb(255 255 255 / .20);
+
+  --texto:     #eef3f8;
+  --texto-2:   #93a3b6;
+  --texto-3:   #64748b;
+
+  --acento:      #e0483c;
+  --acento-2:    #ff6a5e;
+  --acento-suave: rgb(224 72 60 / .16);
+
+  --r-sm: 8px;
+  --r-md: 11px;
+  --r-lg: 16px;
+
+  --sombra: 0 8px 28px rgb(0 0 0 / .45), 0 1px 2px rgb(0 0 0 / .3);
+  --fuente: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --seguro-t: max(14px, env(safe-area-inset-top));
+  --seguro-b: max(14px, env(safe-area-inset-bottom));
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0; padding: 0;
+  height: 100%; overflow: hidden;
+  background: var(--fondo); color: var(--texto);
+  font-family: var(--fuente);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+canvas { display: block; touch-action: none; }
+
+svg { width: 100%; height: 100%; fill: none; stroke: currentColor;
+      stroke-width: 1.8; stroke-linecap: round; }
+
+/* --------------------------------------------------------------- Botones */
+button {
+  font: inherit; color: var(--texto); cursor: pointer;
+  background: rgb(255 255 255 / .05);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-sm);
+  padding: 7px 11px; font-size: 12.5px;
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+button:hover { background: rgb(255 255 255 / .11); }
+button:focus-visible { outline: 2px solid var(--acento-2); outline-offset: 2px; }
+
+button.icono {
+  display: grid; place-items: center;
+  width: 26px; height: 26px; padding: 0; flex: none;
+  color: var(--texto-2); background: none; border-color: transparent;
+}
+button.icono:hover { color: var(--texto); background: rgb(255 255 255 / .1); }
+
+/* ---------------------------------------------------------------- Panel */
+#ui {
+  position: fixed; top: var(--seguro-t); left: 14px;
+  width: 268px; max-height: calc(100dvh - var(--seguro-t) - var(--seguro-b));
+  display: flex; flex-direction: column; gap: 15px;
+  padding: 15px 16px 16px;
+  background: var(--panel);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  backdrop-filter: blur(16px) saturate(1.4);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sombra);
+  overflow-y: auto; overscroll-behavior: contain;
+  user-select: none;
+  scrollbar-width: thin; scrollbar-color: var(--borde-fuerte) transparent;
+}
+
+.cabecera { display: flex; align-items: flex-start; gap: 10px; }
+.cabecera h1 {
+  margin: 0; font-size: 15px; font-weight: 650; letter-spacing: -.01em;
+}
+.cabecera .sub { margin: 3px 0 0; font-size: 11px; color: var(--texto-2); }
+.cabecera .icono { margin-left: auto; display: none; }
+
+.grp { display: flex; flex-direction: column; gap: 8px; }
+
+.lbl {
+  display: flex; align-items: baseline; gap: 6px;
+  font-size: 10px; font-weight: 600; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--texto-3);
+}
+.lbl .val { margin-left: auto; color: var(--texto-2);
+            letter-spacing: 0; font-variant-numeric: tabular-nums; }
+.lbl .pista { margin-left: auto; letter-spacing: 0; text-transform: none;
+              font-weight: 400; font-size: 10px; opacity: .8; }
+
+/* ------------------------------------------------- Control segmentado */
+.segmentado {
+  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+  gap: 3px; padding: 3px;
+  background: rgb(0 0 0 / .3);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-md);
+}
+.segmentado button {
+  background: none; border: none; border-radius: calc(var(--r-md) - 4px);
+  padding: 7px 6px; color: var(--texto-2); font-weight: 550;
+}
+.segmentado button:hover { background: rgb(255 255 255 / .07); color: var(--texto); }
+.segmentado button.on {
+  background: var(--acento); color: #fff;
+  box-shadow: 0 1px 6px rgb(224 72 60 / .45);
+}
+
+/* ------------------------------------------------------------- Chips */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips button { flex: 1 1 auto; min-width: 62px; border-radius: 999px; }
+.chips button.on {
+  background: var(--acento-suave); border-color: rgb(224 72 60 / .5);
+  color: var(--acento-2);
+}
+
+/* --------------------------------------------------------- Secciones */
+#sectores { list-style: none; margin: 0; padding: 0;
+            display: flex; flex-direction: column; gap: 2px; }
+#sectores li {
+  display: flex; align-items: center; gap: 9px;
+  padding: 6px 8px; border-radius: var(--r-sm);
+  font-size: 12.5px; cursor: pointer;
+  border: 1px solid transparent;
+  transition: background .15s ease, border-color .15s ease;
+}
+#sectores li:hover { background: rgb(255 255 255 / .07); border-color: var(--borde); }
+#sectores li.inactivo { opacity: .42; cursor: default; }
+#sectores li.inactivo:hover { background: none; border-color: transparent; }
+#sectores .punto {
+  width: 11px; height: 11px; flex: none; border-radius: 3px;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / .4);
+}
+#sectores .cant {
+  margin-left: auto; font-size: 11px; color: var(--texto-3);
+  font-variant-numeric: tabular-nums;
+}
+/* Lista de límites: comparte el aspecto de #sectores */
+#limites { list-style: none; margin: 0; padding: 0;
+           display: flex; flex-direction: column; gap: 2px; }
+#limites li {
+  display: flex; align-items: center; gap: 9px;
+  padding: 6px 8px; border-radius: var(--r-sm);
+  font-size: 12.5px; cursor: pointer;
+  border: 1px solid transparent;
+  transition: background .15s ease, border-color .15s ease;
+}
+#limites li:hover { background: rgb(255 255 255 / .07); border-color: var(--borde); }
+#limites .clave {
+  flex: none; min-width: 24px; text-align: center;
+  padding: 2px 5px; border-radius: 5px;
+  background: #7a440a; color: #ffd79a;
+  font-size: 10.5px; font-weight: 700; letter-spacing: .03em;
+}
+#limites .cant {
+  margin-left: auto; font-size: 11px; color: var(--texto-3);
+  font-variant-numeric: tabular-nums;
+}
+
+#sectores em {
+  font-style: normal; font-size: 10.5px; color: var(--texto-3);
+  margin-left: 3px;
+}
+#sectores li.grupo::after {
+  content: '›'; color: var(--texto-3); font-size: 14px; line-height: 1;
+  transition: transform .18s ease; margin-left: 2px;
+}
+#sectores li.grupo.abierto::after { transform: rotate(90deg); }
+
+/* Bloques desplegados de un grupo */
+#sectores li.bloques {
+  display: none; flex-wrap: wrap; gap: 4px;
+  padding: 4px 8px 9px 28px; cursor: default;
+}
+#sectores li.bloques:hover { background: none; border-color: transparent; }
+#sectores li.grupo.abierto + li.bloques { display: flex; }
+#sectores .bloque {
+  min-width: 27px; padding: 4px 0; flex: none;
+  font-size: 11px; font-weight: 600; border-radius: 6px;
+  background: rgb(255 255 255 / .07);
+}
+#sectores .bloque:hover {
+  background: var(--acento); border-color: var(--acento); color: #fff;
+}
+
+/* ------------------------------------------------------------ Slider */
+input[type=range] {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 22px; background: none; cursor: pointer;
+}
+input[type=range]::-webkit-slider-runnable-track {
+  height: 4px; border-radius: 999px;
+  background: rgb(255 255 255 / .14);
+}
+input[type=range]::-moz-range-track {
+  height: 4px; border-radius: 999px; background: rgb(255 255 255 / .14);
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 15px; height: 15px; margin-top: -5.5px;
+  border-radius: 50%; background: var(--acento);
+  border: 2px solid #fff; box-shadow: 0 1px 5px rgb(0 0 0 / .5);
+}
+input[type=range]::-moz-range-thumb {
+  width: 15px; height: 15px; border-radius: 50%;
+  background: var(--acento); border: 2px solid #fff;
+}
+input[type=range]:focus-visible { outline: 2px solid var(--acento-2); outline-offset: 4px; }
+
+/* -------------------------------------------------- Ficha de localidad */
+#localidad {
+  position: fixed; top: var(--seguro-t); right: 14px; width: 232px;
+  padding: 14px 16px 15px;
+  background: var(--panel);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  backdrop-filter: blur(16px) saturate(1.4);
+  border: 1px solid var(--borde); border-radius: var(--r-lg);
+  box-shadow: var(--sombra);
+  transition: opacity .22s ease, transform .22s ease;
+}
+#localidad.oculto {
+  opacity: 0; pointer-events: none; transform: translateY(-8px) scale(.98);
+}
+#localidad .icono { position: absolute; top: 9px; right: 9px; }
+#localidad .etiqueta {
+  font-size: 10px; font-weight: 600; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--acento-2); margin-bottom: 4px;
+}
+#localidad .titulo {
+  font-size: 17px; font-weight: 650; letter-spacing: -.015em; margin-bottom: 10px;
+}
+#localidad .datos {
+  margin: 0; display: grid; grid-template-columns: 1fr auto;
+  gap: 5px 12px; font-size: 11.5px;
+}
+#localidad .datos dt { color: var(--texto-3); }
+#localidad .datos dd {
+  margin: 0; text-align: right; color: var(--texto);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------------- Pie */
+#pista, #stats {
+  position: fixed; bottom: var(--seguro-b);
+  font-size: 11px; color: var(--texto-3); pointer-events: none;
+  text-shadow: 0 1px 3px rgb(0 0 0 / .7);
+}
+#pista { left: 16px; margin: 0; }
+#stats { right: 16px; text-align: right; font-variant-numeric: tabular-nums; line-height: 1.5; }
+#stats b { color: var(--texto-2); font-weight: 600; }
+
+/* ------------------------------------------------------- Botón móvil */
+#abrirPanel {
+  position: fixed; top: var(--seguro-t); left: 14px;
+  width: 40px; height: 40px; padding: 8px; display: none;
+  background: var(--panel);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  border-radius: var(--r-md); box-shadow: var(--sombra); z-index: 5;
+}
+
+/* ------------------------------------------------------- Pad de flechas */
+#dpad {
+  position: fixed; right: 14px; bottom: calc(var(--seguro-b) + 46px);
+  width: 126px; height: 126px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 4px; z-index: 5;
+  touch-action: none;
+}
+#dpad button {
+  padding: 0; display: grid; place-items: center;
+  background: var(--panel);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border: 1px solid var(--borde); border-radius: 10px;
+  color: var(--texto-2); box-shadow: var(--sombra);
+}
+#dpad button:hover { color: var(--texto); }
+#dpad button:active { background: var(--acento); border-color: var(--acento); color: #fff; }
+#dpad button svg { width: 22px; height: 22px; fill: currentColor; stroke: none; }
+#dpad [data-dir="up"]    { grid-area: 1 / 2; }
+#dpad [data-dir="left"]  { grid-area: 2 / 1; }
+#dpad [data-dir="right"] { grid-area: 2 / 3; }
+#dpad [data-dir="down"]  { grid-area: 3 / 2; }
+
+/* ------------------------------------------------------------- Carga */
+#carga {
+  position: fixed; inset: 0; z-index: 20;
+  display: grid; place-content: center; justify-items: center; gap: 14px;
+  background: var(--fondo);
+  transition: opacity .5s ease;
+}
+#carga.fuera { opacity: 0; pointer-events: none; }
+.carga-marca { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+.carga-barra {
+  width: 190px; height: 3px; border-radius: 999px;
+  background: rgb(255 255 255 / .1); overflow: hidden;
+}
+.carga-barra i {
+  display: block; width: 40%; height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--acento), transparent);
+  animation: correr 1.1s ease-in-out infinite;
+}
+@keyframes correr {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+.carga-txt { font-size: 11.5px; color: var(--texto-3); }
+
+/* ------------------------------------------------------------ Móvil */
+@media (max-width: 720px) {
+  #abrirPanel { display: block; }
+  .cabecera .icono { display: grid; }
+
+  #ui {
+    top: auto; bottom: 0; left: 0; right: 0; width: 100%;
+    max-height: 68dvh;
+    border-radius: var(--r-lg) var(--r-lg) 0 0;
+    border-bottom: none;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    transform: translateY(101%);
+    transition: transform .28s cubic-bezier(.32, .72, 0, 1);
+  }
+  #ui[data-abierto="true"] { transform: none; }
+
+  #localidad { top: auto; bottom: calc(var(--seguro-b) + 34px); left: 14px; right: 14px; width: auto; }
+  #pista { display: none; }
+  #stats { bottom: calc(var(--seguro-b) - 4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

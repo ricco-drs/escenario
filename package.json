@@ -1,0 +1,22 @@
+{
+  "name": "estadio-san-marcos",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Simulación 3D interactiva del Estadio San Marcos (Lima)",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 4173",
+    "lint": "eslint src",
+    "check": "eslint src && vite build"
+  },
+  "dependencies": {
+    "three": "^0.168.0"
+  },
+  "devDependencies": {
+    "eslint": "^10.7.0",
+    "globals": "^17.7.0",
+    "vite": "^5.4.0"
+  }
+}

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0f14">
+<meta name="description" content="Simulación 3D interactiva del Estadio San Marcos de Lima: recorre las tribunas y elige tu localidad.">
+<title>Estadio San Marcos — Simulación 3D</title>
+<link rel="stylesheet" href="./src/styles.css">
+</head>
+<body>
+
+<!-- Pantalla de carga -->
+<div id="carga">
+  <div class="carga-marca">Estadio San Marcos</div>
+  <div class="carga-barra"><i></i></div>
+  <div class="carga-txt">Construyendo el recinto…</div>
+</div>
+
+<!-- Panel de control -->
+<button id="abrirPanel" aria-label="Abrir controles" aria-expanded="false">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+</button>
+
+<aside id="ui" data-abierto="false">
+  <header class="cabecera">
+    <div>
+      <h1>Estadio San Marcos</h1>
+      <p class="sub">Lima · simulación interactiva</p>
+    </div>
+    <button id="cerrarPanel" class="icono" aria-label="Cerrar controles">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </header>
+
+  <section class="grp">
+    <div class="lbl">Vistas</div>
+    <div class="chips" id="vistas"></div>
+  </section>
+
+  <section class="grp">
+    <div class="lbl">Límites <span class="pista">clic para ir</span></div>
+    <ul id="limites"></ul>
+  </section>
+
+  <section class="grp">
+    <div class="lbl">Secciones <span class="pista">clic para desplegar</span></div>
+    <ul id="sectores"></ul>
+  </section>
+
+  <section class="grp">
+    <div class="lbl">Aforo <span class="val" id="aforoVal">0 %</span></div>
+    <input type="range" id="aforo" min="0" max="100" value="0"
+           aria-label="Porcentaje de aforo">
+  </section>
+
+  <section class="grp">
+    <div class="lbl">Opciones</div>
+    <div class="chips">
+      <button id="btnGirar" class="on">Rotar</button>
+      <button id="btnPublico" class="on">Público</button>
+      <button id="btnButacas" class="on">Butacas</button>
+      <button id="btnRotulos" class="on">Rótulos</button>
+    </div>
+  </section>
+</aside>
+
+<!-- Ficha de la localidad seleccionada -->
+<div id="localidad" class="oculto" role="status">
+  <button id="cerrarLocalidad" class="icono" aria-label="Volver a la vista general">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  </button>
+  <div class="etiqueta" id="locEtiqueta">Localidad</div>
+  <div class="titulo" id="locTitulo">—</div>
+  <dl class="datos" id="locDatos"></dl>
+</div>
+
+<!-- Pad de navegación (útil sobre todo en móvil) -->
+<div id="dpad" aria-label="Mover la cámara">
+  <button data-dir="up"    aria-label="Mirar arriba"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7l-6 8h12z"/></svg></button>
+  <button data-dir="left"  aria-label="Girar a la izquierda"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 12l8-6v12z"/></svg></button>
+  <button data-dir="right" aria-label="Girar a la derecha"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 12l-8 6V6z"/></svg></button>
+  <button data-dir="down"  aria-label="Mirar abajo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17l6-8H6z"/></svg></button>
+</div>
+
+<!-- Pie -->
+<p id="pista">Clic en la gradería para ver desde esa localidad</p>
+<div id="stats"></div>
+
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
