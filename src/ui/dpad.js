@@ -8,8 +8,8 @@ import { setEmpuje } from '../core/cameraRig.js';
  * Se puede mantener más de una flecha a la vez (p. ej. arriba + derecha).
  */
 const DIRECCIONES = {
-  left:  { az: -1, pol: 0 },
-  right: { az: +1, pol: 0 },
+  left:  { az: +1, pol: 0 },
+  right: { az: -1, pol: 0 },
   up:    { az: 0, pol: +1 },
   down:  { az: 0, pol: -1 },
 };
