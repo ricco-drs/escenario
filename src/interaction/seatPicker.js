@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { scene, camera, renderer, onUpdate } from '../core/scene.js';
-import { volarA } from '../core/cameraRig.js';
+import { volarA, entrarMirador, salirMirador, enMirador } from '../core/cameraRig.js';
 import { ovalInverse } from '../geometry/oval.js';
 import { posicionAsiento, bloqueDeArco } from '../world/stands.js';
 import {
@@ -76,7 +76,8 @@ export function crearSelectorAsiento(
     const ojo = new THREE.Vector3(sel.x, sel.y + altura, sel.z);
     const foco = sel.mirarA ?? getFoco?.()
       ?? new THREE.Vector3(sel.x * 0.06, 1.2, sel.z * 0.06);
-    volarA(ojo, foco, { duracion: 1.5 });
+    // vuela hasta el sitio y, al llegar, ancla la cámara en primera persona
+    volarA(ojo, foco, { duracion: 1.5, alLlegar: () => entrarMirador(ojo, foco) });
 
     onSelect?.(sel);
     return sel;
@@ -85,6 +86,7 @@ export function crearSelectorAsiento(
   function limpiar() {
     seleccion = null;
     marcador.visible = false;
+    salirMirador();
     onClear?.();
   }
 
@@ -99,6 +101,8 @@ export function crearSelectorAsiento(
     const movido = Math.hypot(e.clientX - inicio.x, e.clientY - inicio.y);
     inicio = null;
     if (movido > 5 || e.button !== 0) return;
+    // sentado: la cámara está fija, sólo se mira; hay que salir para reubicarse
+    if (enMirador()) return;
 
     puntero.x = (e.clientX / innerWidth) * 2 - 1;
     puntero.y = -(e.clientY / innerHeight) * 2 + 1;

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { scene } from '../core/scene.js';
-import { CONCIERTO, COLOR } from '../config.js';
+import { CONCIERTO, COLOR, HUELLA_ESCENARIO as HE } from '../config.js';
 
 /**
  * Montaje de concierto según el mapa de localidades: escenario centrado en la
@@ -33,11 +33,15 @@ function formaCampo() {
   return f;
 }
 
-/** ¿El punto está dentro del campo vendible? */
+/** ¿El punto está sobre la huella del escenario (no pisable)? */
+export function sobreEscenario(x, z) {
+  return Math.abs(x - HE.x) < HE.hx && Math.abs(z - HE.z) < HE.hz;
+}
+
+/** ¿El punto está en zona de público de pie (campo, fuera del escenario)? */
 export function enCampo(x, z) {
   if (x < C.xMin || x > C.xMax || Math.abs(z) > C.ancho / 2) return false;
-  const ex = (x - ESC.x) / (ESC.rx + 4), ez = z / (ESC.rz + 4);
-  return ex * ex + ez * ez >= 1;         // fuera del escenario y su foso
+  return !sobreEscenario(x, z);
 }
 
 /** ¿El punto cae sobre un pasillo de circulación? */
@@ -69,7 +73,9 @@ export function crearConcierto() {
   grupo.name = 'concierto';
 
   /* Plano invisible del campo: sin color rojo ni aspas negras pintadas —
-   * sólo sirve de superficie clicable para ubicarse de pie en el campo. */
+   * sólo sirve de superficie clicable para ubicarse de pie en el campo.
+   * Va directo a la escena (no al grupo de concierto) para seguir activo
+   * aunque el resto del decorado de concierto esté oculto. */
   const campo = new THREE.Mesh(
     new THREE.ShapeGeometry(formaCampo(), 20),
     new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
@@ -77,7 +83,7 @@ export function crearConcierto() {
   campo.rotation.x = -Math.PI / 2;
   campo.position.y = 0.07;
   campo.name = 'campo';
-  grupo.add(campo);
+  scene.add(campo);
 
   /* --- escenario procedural --- *
    * Maqueta sencilla que sirve de reserva mientras carga el modelo GLB, y

@@ -29,18 +29,84 @@ let vuelo = null, tVuelo = 0;
 let orbitando = true;
 let velocidadOrbita = 0.045;
 
+const V3 = (v) => (v instanceof THREE.Vector3 ? v.clone() : new THREE.Vector3(...v));
+
 /** Anima la cámara hasta una posición y un punto de mira. */
-export function volarA(pos, tgt, { duracion = 1.2, detenerOrbita = true } = {}) {
+export function volarA(pos, tgt, { duracion = 1.2, detenerOrbita = true, alLlegar } = {}) {
   vuelo = {
     from: camera.position.clone(),
-    to: pos instanceof THREE.Vector3 ? pos.clone() : new THREE.Vector3(...pos),
+    to: V3(pos),
     tf: controls.target.clone(),
-    tt: tgt instanceof THREE.Vector3 ? tgt.clone() : new THREE.Vector3(...tgt),
+    tt: V3(tgt),
     dur: duracion,
+    alLlegar,
   };
   tVuelo = 0;
   if (detenerOrbita) orbitando = false;
 }
+
+/* ---------- Primera persona (mirador) ---------- *
+ * Ancla la cámara en un punto fijo (el ojo del espectador) y sólo permite
+ * girar la mirada, como estar sentado de verdad. Se sale con salirMirador().
+ */
+const mirador = { activo: false, yaw: 0, pitch: 0 };
+const ojo = new THREE.Vector3();
+const dir = new THREE.Vector3();
+const SENS = 0.0045;                 // radianes por píxel arrastrado
+const PITCH_MAX = 1.35;              // ~77°, para no volcar la vista
+
+export const enMirador = () => mirador.activo;
+
+function orientarDesde(punto, mira) {
+  const v = V3(mira).sub(punto).normalize();
+  mirador.yaw = Math.atan2(v.x, v.z);
+  mirador.pitch = Math.asin(THREE.MathUtils.clamp(v.y, -1, 1));
+}
+
+/** Entra en primera persona: cámara fija en `punto`, mirando a `mira`. */
+export function entrarMirador(punto, mira) {
+  ojo.copy(V3(punto));
+  orientarDesde(ojo, mira);
+  mirador.activo = true;
+  orbitando = false;
+  controls.enabled = false;
+  vuelo = null;
+}
+
+/** Sale de primera persona y devuelve el control de órbita. */
+export function salirMirador() {
+  if (!mirador.activo) return;
+  mirador.activo = false;
+  controls.enabled = true;
+  // deja el objetivo de órbita ~10 m delante, para que la órbita sea natural
+  dir.set(Math.sin(mirador.yaw) * Math.cos(mirador.pitch),
+          Math.sin(mirador.pitch),
+          Math.cos(mirador.yaw) * Math.cos(mirador.pitch));
+  controls.target.copy(camera.position).addScaledVector(dir, 10);
+}
+
+function aplicarMirador() {
+  mirador.pitch = THREE.MathUtils.clamp(mirador.pitch, -PITCH_MAX, PITCH_MAX);
+  dir.set(Math.sin(mirador.yaw) * Math.cos(mirador.pitch),
+          Math.sin(mirador.pitch),
+          Math.cos(mirador.yaw) * Math.cos(mirador.pitch));
+  camera.position.copy(ojo);
+  camera.lookAt(ojo.x + dir.x, ojo.y + dir.y, ojo.z + dir.z);
+}
+
+/* Arrastre en primera persona: gira la mirada alrededor del punto fijo. */
+let arrastrando = false, lx = 0, ly = 0;
+renderer.domElement.addEventListener('pointerdown', (e) => {
+  if (!mirador.activo) return;
+  arrastrando = true; lx = e.clientX; ly = e.clientY;
+});
+renderer.domElement.addEventListener('pointermove', (e) => {
+  if (!mirador.activo || !arrastrando) return;
+  mirador.yaw += (e.clientX - lx) * SENS;
+  mirador.pitch -= (e.clientY - ly) * SENS;
+  lx = e.clientX; ly = e.clientY;
+});
+addEventListener('pointerup', () => { arrastrando = false; });
 
 export function irAVista(nombre) {
   const v = VISTAS[nombre];
@@ -67,6 +133,12 @@ export function setEmpuje(az, pol) {
   if (az || pol) orbitando = false;      // el usuario toma el control
 }
 
+function empujarMirador(dt) {
+  // en primera persona las flechas giran la mirada: der. = mirar a la derecha
+  mirador.yaw -= empuje.az * VEL_EMPUJE * dt;
+  mirador.pitch += empuje.pol * VEL_EMPUJE * dt;
+}
+
 function aplicarEmpuje(dt) {
   rel.copy(camera.position).sub(controls.target);
   esferica.setFromVector3(rel);
@@ -88,8 +160,18 @@ onUpdate((dt) => {
     const e = easeInOut(tVuelo);
     camera.position.lerpVectors(vuelo.from, vuelo.to, e);
     controls.target.lerpVectors(vuelo.tf, vuelo.tt, e);
-    if (tVuelo >= 1) vuelo = null;
-  } else if (empuje.az || empuje.pol) {
+    if (tVuelo >= 1) { const cb = vuelo.alLlegar; vuelo = null; cb?.(); }
+    controls.update();
+    return;
+  }
+
+  if (mirador.activo) {
+    if (empuje.az || empuje.pol) empujarMirador(dt);
+    aplicarMirador();
+    return;                              // órbita desactivada mientras estás sentado
+  }
+
+  if (empuje.az || empuje.pol) {
     aplicarEmpuje(dt);
   } else if (orbitando) {
     const r = Math.hypot(camera.position.x, camera.position.z);

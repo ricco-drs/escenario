@@ -12,7 +12,7 @@ import { crearPublico } from './world/crowd.js';
 import { crearButacas } from './world/seats.js';
 import {
   crearConcierto, posicionesCampo, aforoCampo,
-  enCampo, enPasillo, zonaDeCampo,
+  enCampo, zonaDeCampo,
 } from './world/concert.js';
 import { crearEscenario } from './world/stage.js';
 
@@ -25,7 +25,7 @@ import { crearSelectorAsiento } from './interaction/seatPicker.js';
 import { crearInterfaz } from './ui/panel.js';
 import { crearDpad } from './ui/dpad.js';
 
-import { CONCIERTO, LIMITES, TRIBUNA_SUR, D0, D_TOP, Y_TOP } from './config.js';
+import { ESCENARIO_MODELO, LIMITES, TRIBUNA_SUR, D0, D_TOP, Y_TOP } from './config.js';
 
 /* ---------- Recinto ---------- */
 crearSuperficie();
@@ -57,7 +57,7 @@ const campoPorZona = aforoCampo(plazasCampo);
 
 /* ---------- Interacción ---------- */
 const AFORO_INICIAL = 0;      // estadio vacío: el aforo se sube desde el panel
-const FOCO_ESCENARIO = new THREE.Vector3(CONCIERTO.escenario.x, 4, 0);
+const FOCO_ESCENARIO = new THREE.Vector3(ESCENARIO_MODELO.x, 9, 0);
 
 // Vista única: el estadio con el escenario montado (sin modo concierto).
 const modo = 'estadio';
@@ -83,10 +83,9 @@ const selector = crearSelectorAsiento(
     };
   },
 
-  /** Un clic en el campo devuelve la zona de acceso y un sitio de pie. */
+  /** Un clic en el campo te pone de pie ahí, mirando al escenario. */
   resolverCampo(p) {
-    if (modo !== 'concierto') return null;
-    if (!enCampo(p.x, p.z) || enPasillo(p.x, p.z)) return null;
+    if (!enCampo(p.x, p.z)) return null;      // fuera del campo o sobre el escenario
 
     const zona = zonaDeCampo(p.x, p.z);
     return {
@@ -94,7 +93,7 @@ const selector = crearSelectorAsiento(
       dePie: true,
       zona,
       x: p.x, y: 0.1, z: p.z,
-      distancia: Math.hypot(p.x - CONCIERTO.escenario.x, p.z),
+      distancia: Math.hypot(p.x - ESCENARIO_MODELO.x, p.z),
       aforoZona: campoPorZona.get(zona.id) ?? 0,
       mirarA: FOCO_ESCENARIO.clone(),
     };

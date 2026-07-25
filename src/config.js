@@ -231,6 +231,15 @@ export const ESCENARIO_MODELO = {
   giro: 0,            // rotación en Y, en radianes
   x: 8, z: 0,         // centro sobre el campo, desplazado hacia Acceso B (+x)
   base: 0.08,         // apoyo sobre la superficie del campo
+  nativo: { ancho: 43.32, fondo: 27.03 },   // huella del modelo sin escalar
+};
+
+/** Semiejes de la huella del escenario ya escalada (para excluir público). */
+export const HUELLA_ESCENARIO = {
+  x: ESCENARIO_MODELO.x,
+  z: ESCENARIO_MODELO.z,
+  hx: ESCENARIO_MODELO.nativo.ancho * ESCENARIO_MODELO.escala * 0.5 * 0.62,
+  hz: ESCENARIO_MODELO.nativo.fondo * ESCENARIO_MODELO.escala * 0.5 * 0.72,
 };
 
 /* ---------- Paleta ---------- */

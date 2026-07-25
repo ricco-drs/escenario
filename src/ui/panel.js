@@ -169,11 +169,10 @@ export function crearInterfaz({
     valorAforo.textContent = slider.value + ' %';
     publico.setAforo(f);
     publicoSur.setAforo(f);
-    publicoCampo.setAforo(modo === 'concierto' ? f : 0);
+    publicoCampo.setAforo(f);      // el campo también se llena de público
 
     const enGrada = [...porGrupo.values()].reduce((a, b) => a + b, 0);
-    const enCampo = modo === 'concierto'
-      ? [...campoPorZona.values()].reduce((a, b) => a + b, 0) : 0;
+    const enCampo = [...campoPorZona.values()].reduce((a, b) => a + b, 0);
     capacidad = enGrada + enCampo + tribunaSur.aforo;
 
     pintarStats(Math.round(capacidad * f));
